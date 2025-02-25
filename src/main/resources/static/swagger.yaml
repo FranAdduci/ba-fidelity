@@ -1,0 +1,146 @@
+openapi: 3.0.0
+info:
+  title: API de Autenticación, Customer Info y Ventas
+  description: API para autenticación, recuperación de información del cliente y procesamiento de ventas.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/soap
+
+paths:
+  /synchroAndLogin:
+    post:
+      summary: Recuperar sessionID
+      description: Permite autenticarse y obtener un sessionID válido
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serialNumber:
+                  type: string
+                  example: "123456"
+                username:
+                  type: string
+                  example: "user1"
+                password:
+                  type: string
+                  example: "password123"
+                foreignID:
+                  type: string
+                  example: "98765"
+      responses:
+        200:
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionID:
+                    type: string
+                    example: "abc123"
+        500:
+          description: Error en la autenticación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No se pudo obtener el SessionID"
+
+  /getInfo:
+    post:
+      summary: Recuperar customerID
+      description: Recupera el customerID basado en el sessionID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionID:
+                  type: string
+                  example: "abc123"
+                card:
+                  type: string
+                  example: "100"
+      responses:
+        200:
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "CustomerID: 7890"
+        400:
+          description: Error en la solicitud
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Error: sessionID es requerido"
+        500:
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Error al obtener la información del cliente"
+
+  /venta:
+    post:
+      summary: Realizar una venta
+      description: Procesa una venta basada en el ID de sesión y cliente.
+      parameters:
+        - name: sessionID
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "abc123"
+        - name: customerID
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 7890
+        - name: totalMoney
+          in: query
+          required: true
+          schema:
+            type: number
+          example: 100.50
+        - name: notes
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "Compra de prueba"
+      responses:
+        200:
+          description: Venta procesada correctamente
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "SUCCESS"
+        400:
+          description: Parámetros inválidos
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Error: sessionID es requerido"
+        500:
+          description: Error al procesar la venta
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Error al realizar la venta"

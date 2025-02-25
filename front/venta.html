@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            margin: auto;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        #ventaInfo {
+            margin-top: 15px;
+            text-align: left;
+            background: #1e1e1e;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 300px;
+            font-family: "Courier New", monospace;
+        }
+        #error {
+            margin-top: 15px;
+            color: #b30000;
+            font-weight: bold;
+        }
+        .copy-button {
+            margin-top: 5px;
+            background-color: #28a745;
+            display: none;
+        }
+        .copy-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Realizar Venta</h2>
+        
+        <label for="totalMoneyInput">Total Money:</label>
+        <input type="number" id="totalMoneyInput" placeholder="Ingrese el monto total" required>
+
+        <label for="notesInput">Notes:</label>
+        <input type="text" id="notesInput" placeholder="Ingrese notas" required>
+
+        <button onclick="procesarVenta()">Procesar Venta</button>
+
+        <pre id="ventaInfo"></pre>
+        <button class="copy-button" onclick="copiarJSON()">📋 Copiar JSON</button>
+        <p id="error"></p>
+    </div>
+
+    <script>
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionID = urlParams.get('sessionID');
+        const customerID = urlParams.get('customerID');
+        
+        document.getElementById('sessionID').innerText = sessionID;
+        document.getElementById('customerID').innerText = customerID;
+        
+        function procesarVenta() {
+            
+            document.getElementById("ventaInfo").innerText = "";
+            document.getElementById("error").innerText = "";
+            document.querySelector(".copy-button").style.display = "none"; // Ocultar botón copiar
+
+            // Obtener los valores
+            const totalMoney = document.getElementById('totalMoneyInput').value;
+            const notes = document.getElementById('notesInput').value;
+
+            // Validar si los parámetros existen y si los campos de entrada no están vacíos
+            if (!sessionID || !customerID || !totalMoney || !notes) {
+                document.getElementById("error").innerText = "⚠️ Error: Faltan parámetros necesarios para realizar la venta.";
+                return;
+            }
+
+            const url = `http://localhost:8080/api/soap/venta?sessionID=${sessionID}&customerID=${customerID}&totalMoney=${totalMoney}&notes=${encodeURIComponent(notes)}`;
+
+            // Realizar la solicitud al back-end para procesar la venta
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    document.getElementById("ventaInfo").innerText = JSON.stringify(data, null, 4); // Formatea
+                    document.querySelector(".copy-button").style.display = "block"; // Copia
+                } else {
+                    document.getElementById("error").innerText = "⚠️ No se pudo procesar la venta.";
+                }
+            })
+            .catch(error => {
+                document.getElementById("error").innerText = "⚠️ Error en la solicitud: " + error.message;
+            });
+        }
+
+        // Función para copiar JSON al portapapeles porque se ve algo mal
+        function copiarJSON() {
+            const jsonText = document.getElementById("ventaInfo").innerText;
+            navigator.clipboard.writeText(jsonText).then(() => {
+                alert("📋 JSON copiado al portapapeles.");
+            }).catch(err => {
+                console.error("Error al copiar:", err);
+            });
+        }
+    </script>
+
+</body>
+</html>

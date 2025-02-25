@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información del Cliente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: auto;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #clienteInfo {
+            margin-top: 15px;
+            font-weight: bold;
+            color: green;
+            word-wrap: break-word;
+        }
+        #error {
+            margin-top: 15px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Tarjetas Asociadas</h2>
+        
+        <button onclick="consultarCliente(100)">100</button>
+        
+        <p id="clienteInfo"></p>
+        <p id="error"></p>
+    </div>
+
+    <script>
+        function consultarCliente(cardNumber) {
+            
+            document.getElementById("clienteInfo").innerText = "";
+            document.getElementById("error").innerText = "";
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionID = urlParams.get('sessionID');
+            
+            if (!sessionID) {
+                document.getElementById("error").innerText = "⚠️ Error: No se recibió sessionID.";
+                return;
+            }
+
+            // Preparar el objeto de datos para la solicitud con el valor fijo de tarjeta
+            const data = {
+                sessionID: sessionID,
+                card: cardNumber,
+                customerID: "",
+                mobile: "",
+                email: "",
+                identityCard: "",
+                foreignId: ""
+            };
+            
+            fetch("http://localhost:8080/api/soap/getInfo", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    
+                    return response.text();
+                } else {
+                    throw new Error("No se pudo obtener la información");
+                }
+            })
+            .then(data => {                
+                const customerID = data;
+
+                if (customerID) {
+                    document.getElementById("clienteInfo").innerText = "✅ Cliente encontrado: " + data;
+                    
+                    window.location.href = `venta.html?sessionID=${sessionID}&customerID=${customerID}`;
+                } else {
+                    document.getElementById("error").innerText = "⚠️ No se encontró información del cliente.";
+                }
+            })
+            .catch(error => {
+                document.getElementById("error").innerText = "⚠️ Error en la solicitud: " + error.message;
+            });
+        }
+    </script>
+
+</body>
+</html>

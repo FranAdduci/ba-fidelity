@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obtener SessionID</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: auto;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #error {
+            margin-top: 15px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Obtener SessionID</h2>
+        <input type="text" id="serialNumber" placeholder="Serial Number" required>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="text" id="foreignID" placeholder="Foreign ID (Opcional)">
+        <button onclick="obtenerSessionID()">Obtener</button>
+        <p id="error"></p>
+    </div>
+
+    <script>
+        function obtenerSessionID() {
+            document.getElementById("error").innerText = "";
+
+            const serialNumber = document.getElementById("serialNumber").value.trim();
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const foreignID = document.getElementById("foreignID").value.trim();
+
+            if (!serialNumber || !username || !password) {
+                document.getElementById("error").innerText = "⚠️ Todos los campos son obligatorios (excepto Foreign ID)";
+                return;
+            }
+
+            const data = { serialNumber, username, password, foreignID };
+
+            fetch("http://localhost:8080/api/soap/synchroAndLogin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sessionID) {
+                    
+                    window.location.href = `getInfo.html?sessionID=${data.sessionID}`;
+                } else {
+                    document.getElementById("error").innerText = "⚠️ Error al obtener el SessionID";
+                }
+            })
+            .catch(error => {
+                document.getElementById("error").innerText = "⚠️ Error en la solicitud: " + error.message;
+            });
+        }
+    </script>
+
+</body>
+</html>
