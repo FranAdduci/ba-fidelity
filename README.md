@@ -6,8 +6,7 @@ Este proyecto es una aplicación web en **Spring Boot 3** que expone endpoints S
 ## 🚀 Características
 ✅ API REST basada en SOAP  
 ✅ Documentación con **Swagger UI**  
-✅ Implementación con **Spring Boot 3 + Maven**  
-✅ Contenedor Docker para despliegue  
+✅ Implementación con **Spring Boot 3 + Maven**    
 ✅ Pruebas unitarias con **JUnit**  
 
 ---
